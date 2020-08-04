@@ -11,14 +11,12 @@ library(Biostrings)
 options(stringsAsFactors = F)
 source("scripts/helper_functions.R")
 
-org = 'zebrafish_big'
-org = 'arabidopsis'
+org = 'human'
 
+for(org in (c('human', 'yeast', 'arabidopsis', 'zebrafish'))){
 
-for(org in (c('human', 'zebrafish', 'arabidopsis', 'yeast'))){
-
-  load(paste0("data/", gsub("_big", "",org), "/processed_ensembl.Rdata"))
-  
+  load(paste0("data/", org, "/processed_ensembl.Rdata"))
+    
   #### read in Trinity assembly fasta ####
   trinity = halpme::read_fasta2df(paste0("data/", org, "/Trinity.fasta"))
   trinity$transcript_id = strv_split(trinity$seq_id, "[ ]", 1)
@@ -38,7 +36,7 @@ for(org in (c('human', 'zebrafish', 'arabidopsis', 'yeast'))){
   write.table(combined_data, file=paste0("data/", org, "/trinity_with_kallisto.txt"), sep='\t', quote=F, row.names = F)
 
   # blast cdna --> trinity
-  e2t = fread(paste0("data/",org, "/ensembl/cdna2trinity_blast.txt.gz"), data.table=F)
+  e2t = fread(paste0("data/",org, "/blast_results/cdna2trinity_blast.txt"), data.table=F)
   colnames(e2t) = c("query", "subject", "p_ident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore")
   
   # check blastx run on protein ids???
@@ -88,7 +86,7 @@ for(org in (c('human', 'zebrafish', 'arabidopsis', 'yeast'))){
               quote=F, row.names = F, col.names = F, sep='\n')
   
   # blastx to match to best
-  blastx = fread(paste0("data/",org, "/ensembl/blastx_trinity2pep.txt"), data.table = F, fill=T)
+  blastx = fread(paste0("data/",org, "/blast_results/blastx_trinity2pep.txt"), data.table = F, fill=T)
   colnames(blastx) = c("query", "subject", "p_ident", "length", "mismatch", "gapopen", "qstart", "qend", "sstart", "send", "evalue", "bitscore","sframe", "qframe")
   
   ## combine multi blastx hits to single line
