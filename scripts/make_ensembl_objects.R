@@ -99,7 +99,7 @@ for(org in c("human", "arabidopsis", "yeast","zebrafish")){
     # UTRs from this annotation cover the 5' transcription start site and the 3' transcritpion end point (i.e. over the whole gene body)
     utr_ol = findOverlaps(ens_granges, utr_granges, type = "within")
     utr_annot = get_utr_coords_from_overlaps(utr_ol, utr_granges, ens_granges)
-    rm(utr_ol, utr_granges, ens_granges)
+    #rm(utr_ol, utr_granges, ens_granges)
     
   }
   if(org =="arabidopsis"){
@@ -184,3 +184,4 @@ for(org in c("human", "arabidopsis", "yeast","zebrafish")){
   
   save(ensembl_peps, ensembl_tx_fullbody, ensembl_gff, ensembl_gff_cds,ensembl_gff_gene, transcripts, utr_annot, file=paste0("data/", org, "/processed_ensembl.Rdata"))
 }
+

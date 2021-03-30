@@ -10,9 +10,9 @@ library(Biostrings)
 
 options(stringsAsFactors = F)
 
-for(org in c('human','arabidopsis','yeast', 'zebrafish')){
+for(org in c('arabidopsis','yeast', 'zebrafish','human')){
     
-    load(paste0("data/",org,"/LCS/upto_lcs.rdata"))
+    load(paste0("data/",org,"/ALLDATA_upto_lcs.rdata"))
     
     # first, do lcs for sequences on both strands
     # do_neg has seqs for both lcs calcs on both strands

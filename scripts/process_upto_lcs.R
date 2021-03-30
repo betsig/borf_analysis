@@ -3,7 +3,7 @@
 library(data.table)
 library(tidyverse)
 library(stringr)
-library(halpme)
+library(halpme) # github: betsig/halpme
 library(GenomicRanges)
 library(stringdist)
 library(Biostrings)
@@ -11,7 +11,6 @@ library(Biostrings)
 options(stringsAsFactors = F)
 source("scripts/helper_functions.R")
 
-org = 'human'
 
 for(org in (c('human', 'yeast', 'arabidopsis', 'zebrafish'))){
 
