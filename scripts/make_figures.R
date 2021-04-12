@@ -536,7 +536,7 @@ plot_5utr_diffs= ggplot(trinity_translated[filter,],
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_y_continuous("Assembled 5'UTR -\nreference 5'UTR (nt)")+ ggtitle("5' UTR length\ndifferences")
 
-pdf("plots/Figure3.pdf", height=5, width=4.4)
+pdf("plots/Figure3_additional_plots.pdf", height=5, width=4.4)
 ggdraw() +
   draw_plot(plot_ensembl_upstream + ggtitle("Reference transcripts"), 0,0.4,0.5,0.6) + 
   draw_plot(plot_ass_up + theme(legend.position = "none")+ ggtitle("Assembled transcripts"), 0.5,0.4,0.5,0.6) + 
@@ -545,6 +545,10 @@ ggdraw() +
   draw_plot_label(c("A","B","C","D"), size=12, x=c(0,0.5,0,0.4), y=c(1,1,0.4,0.4)) 
 dev.off()  
 
+pdf("plots/Figure3.pdf", height=2.5, width=3.3)
+plot_acc_100 + theme(legend.position = "right")+
+  guides(col=guide_legend(ncol=1))
+dev.off()  
 
 
  ############################
@@ -902,6 +906,10 @@ plot_method_accuracy = ggplot(total_ts_long, aes(x=organism, y=accuracy, col=met
   scale_color_manual(values = c("#00B8D9", "#FFAB00"), "Method") + 
   ggtitle("Prediction accuracy") + 
   scale_x_discrete("Species") + scale_y_continuous("Accuracy")
+
+colnames(total_ts)[1:2] = c("Species/Annotation", "Total transcripts")
+write_csv(total_ts, "supp_compare_accuracy.csv")
+
 runtimes = read.delim("data/timing_tests/timing_tests.txt")
 plot_runtime = 
   ggplot(runtimes, aes(x=n, y=time_sec, col=software)) + 
