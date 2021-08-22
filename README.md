@@ -130,6 +130,20 @@ borf trinity_denovo/Trinity.fasta
 **Transdecoder-5.5.0**
 ```
 TransDecoder.LongOrfs -t trinity_denovo/Trinity.fasta
+TransDecoder.Predict -t trinity_denovo/Trinity.fasta
+```
+
+# GenemarkS-T of trinity
+**GenemarkS-T-5.1**
+```
+./gmst.pl --fnn --faa trinity_denovo/Trinity.fasta
+```
+
+# Alignment of transcripts to reference genome.
+**GMAP-2021-05-27**
+```
+gmap_build -D gmap -d ens_98 *.primary_assembly.fa
+gmap -D gmap -d ens_98 -f 3 --gff3-add-separators=0 Trinity.fasta > Trinity.gmap.gff
 ```
 
 # Timing of Borf and Transdecoder
@@ -222,6 +236,9 @@ Makes: Supp_Figure_citations.pdf
 **make_figures.R**
 Makes: Figure1.pdf, Figure3.pdf, Figure3.pdf, Figure5.pdf,
 Supp_Figure_5primes.pdf, Supp_Figure_cutoffs.pdf, Supp_Figure_read_counts.pdf
+
+**check_splice_site.R**
+Processes the GMAP data.
 
 **stranded_plots.R**
 Makes: Figure2.pdf
