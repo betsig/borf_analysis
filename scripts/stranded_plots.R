@@ -79,26 +79,26 @@ trinity_translated_bs$base_class_f2 = factor(gsub("_", " ", trinity_translated_b
 
 
 trinity_translated_bs$match_strand = factor(trinity_translated_bs$match_strand, levels = c("+",  "-"))
-s1 = 
-    ggplot(trinity_translated_bs[which(trinity_translated_bs$read_counts >=100),], aes(x=match_strand, fill=base_class_f2)) + 
+s1 =
+    ggplot(trinity_translated_bs[which(trinity_translated_bs$read_counts >=100),], aes(x=match_strand, fill=base_class_f2)) +
     geom_bar() + facet_wrap(~organism, scales="free", ncol=4) +
     theme_figure +
-    scale_x_discrete("BlastN match strand") + 
+    scale_x_discrete("BlastN match strand") +
     scale_y_continuous("Number of transcripts") +
     theme(legend.position = "bottom") +
-    scale_fill_manual(values=base_class_pal2, "Assembled transcript class") + ggtitle("ORF match type") + 
+    scale_fill_manual(values=base_class_pal2, "Assembled transcript class") + ggtitle("ORF match type") +
         guides(fill=guide_legend(title.position = "top", title.hjust = 0.5, nrow=2))
 
-ggplot(trinity_translated_bs, aes(fill=match_strand, x=read_counts+0.01)) + 
-    geom_histogram(bins=50, position='dodge') + 
-    facet_wrap(~org, scales="free", ncol=4) + 
+ggplot(trinity_translated_bs, aes(fill=match_strand, x=read_counts+0.01)) +
+    geom_histogram(bins=50, position='dodge') +
+    facet_wrap(~org, scales="free", ncol=4) +
     theme_figure + scale_x_log10()
 
 
 
-s2 = ggplot(trinity_translated_bs[which(trinity_translated_bs$read_counts >=100),], 
-       aes(x=match_strand, y=read_counts+0.01)) + 
-    geom_boxplot( lwd=0.25, aes(fill=match_strand), outlier.shape = NA) + facet_wrap(~organism, scales="free", ncol=4) + 
+s2 = ggplot(trinity_translated_bs[which(trinity_translated_bs$read_counts >=100),],
+       aes(x=match_strand, y=read_counts+0.01)) +
+    geom_boxplot( lwd=0.25, aes(fill=match_strand), outlier.shape = NA) + facet_wrap(~organism, scales="free", ncol=4) +
     scale_x_discrete("BlastN match strand") + scale_fill_manual(values = c("#1f78b4","#a6cee3")) +
     scale_y_log10("Total read counts",expand = expansion(mult = c(0.05, 0.15))) +
     stat_compare_means(comparisons = list(c("+", "-")), method = "wilcox.test", size = 2, tip.length = 0.01, vjust=-0.2, bracket.size = 0.25) +
@@ -109,23 +109,64 @@ s2 = ggplot(trinity_translated_bs[which(trinity_translated_bs$read_counts >=100)
 
 
 
-s3 = ggplot(trinity_translated_bs[which(trinity_translated_bs$base_class != "insufficient_coverage" & trinity_translated_bs$read_counts >=100),], 
-            aes(fill=match_strand, y=coding_potential, x=match_strand)) + 
+s3 = ggplot(trinity_translated_bs[which(trinity_translated_bs$base_class != "insufficient_coverage" & trinity_translated_bs$read_counts >=100),],
+            aes(fill=match_strand, y=coding_potential, x=match_strand)) +
     scale_fill_manual(values =  c("#1f78b4","#a6cee3")) +
-    scale_y_continuous("RNAsamba coding score",expand = expansion(mult = c(0.05, 0.15))) + 
+    scale_y_continuous("RNAsamba coding score",expand = expansion(mult = c(0.05, 0.15))) +
     scale_x_discrete("BlastN match strand") +
-    geom_boxplot(outlier.shape = NA, lwd=0.25) + facet_wrap(~organism, scales="free", ncol=4) + 
-    theme_figure + theme(legend.position = "none") + ggtitle("Coding probability") + 
+    geom_boxplot(outlier.shape = NA, lwd=0.25) + facet_wrap(~organism, scales="free", ncol=4) +
+    theme_figure + theme(legend.position = "none") + ggtitle("Coding probability") +
     stat_compare_means(comparisons = list(c("+", "-")), method = "wilcox.test", size = 2, tip.length = 0.01, vjust=-0.2, bracket.size = 0.25)
 
 
-library(cowplot)
 
+    splicesite_checks = fread( "data/splice_site_checks2.txt", data.table = F)
+
+
+    splicesite_checks$match_strand = factor(splicesite_checks$match_strand, levels = c("+",  "-"))
+    splicesite_checks$organism = "h. sapiens"
+    splicesite_checks$organism[splicesite_checks$org == "zebrafish"] = "d. rerio"
+    splicesite_checks$organism[splicesite_checks$org == "arabidopsis"] = "a. thaliana"
+
+
+    splice_totals = as.data.frame(table(splicesite_checks$organism[!is.na(splicesite_checks$percent_intron_correct)],
+                                        splicesite_checks$percent_intron_correct[!is.na(splicesite_checks$percent_intron_correct)]>0,
+                                        splicesite_checks$match_strand[!is.na(splicesite_checks$percent_intron_correct)]))
+    colnames(splice_totals) = c("organism", "overlaps_intron", "match_strand", "n")
+    splice_totals$y_val = 0.1
+    splice_totals$y_val[splice_totals$overlaps_intron == FALSE] =1.05
+
+    pdf("plots/Supp_Figure_spliceSites.pdf", height=2.5,width=4)
+    ggplot(splicesite_checks[!is.na(splicesite_checks$percent_intron_correct),], aes(x=match_strand)) +
+        geom_bar(position="fill",aes(fill=percent_intron_correct>0)) +
+        scale_fill_manual(values =  c("#1f78b4","#a6cee3"), "Splice junctions\nshared with reference", labels=c("0", ">=1")) +
+        geom_text(data=splice_totals, aes(label=n, y=y_val), size=2) +
+        #scale_y_continuous("Percent of splice junctions matching reference",expand = expansion(mult = c(0.05, 0.15)), breaks=c(0,0.5,1)) +
+        #scale_x_discrete("BlastN match strand") +
+        theme_figure + ggtitle("Splice junction sharing") +
+        scale_x_discrete("BlastN match strand") +
+        scale_y_continuous("Proportion of transcripts")+
+        #stat_compare_means(comparisons = list(c("+", "-")), method = "wilcox.test", size = 2, tip.length = 0.01, vjust=-0.2, bracket.size = 0.25)
+        facet_wrap(~organism, ncol=3)
+    dev.off()
+
+    chisq.test(table(splicesite_checks$percent_intron_correct[!is.na(splicesite_checks$percent_intron_correct) & splicesite_checks$organism == "h. sapiens"]>0,
+          splicesite_checks$match_strand[!is.na(splicesite_checks$percent_intron_correct)& splicesite_checks$organism == "h. sapiens"] ))
+    chisq.test(table(splicesite_checks$percent_intron_correct[!is.na(splicesite_checks$percent_intron_correct) & splicesite_checks$organism == "a. thaliana"]>0,
+                     splicesite_checks$match_strand[!is.na(splicesite_checks$percent_intron_correct)& splicesite_checks$organism == "a. thaliana"] ))
+    chisq.test(table(splicesite_checks$percent_intron_correct[!is.na(splicesite_checks$percent_intron_correct) & splicesite_checks$organism == "d. rerio"]>0,
+                     splicesite_checks$match_strand[!is.na(splicesite_checks$percent_intron_correct)& splicesite_checks$organism == "d. rerio"] ))
+
+
+    splice_percent  = splice_totals %>% filter(overlaps_intron==TRUE & match_strand=="-")
+    splice_percent$percent =( splice_percent$n / aggregate(n~organism, splice_totals, sum)$n)*100
+
+    library(cowplot)
 pdf("plots/Figure2.pdf", height=5.5,width=4.4)
 ggdraw() +
-    draw_plot(s1, 0,0.6,1,0.4) + 
+    draw_plot(s1, 0,0.6,1,0.4) +
     draw_plot(s2 + theme(legend.position = "none"), 0,0.3,1,0.3)+
     draw_plot(s3 + theme(legend.position = "none"), 0,0,1,0.3)+
     #draw_plot(leg, 0.86,0,0.14,1) +
-    draw_plot_label(c("A","B", "C"), size=12, x=c(0,0.,0), y=c(1,0.6,0.3))   
+    draw_plot_label(c("A","B", "C"), size=12, x=c(0,0.,0), y=c(1,0.6,0.3))
 dev.off()
