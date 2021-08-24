@@ -17,17 +17,21 @@ for(j in 1:5){
 timing_script = vector()
 for(i in seq_along(n_txs)){
     for(j in 1:5){
-        
+
         timing_script = c(timing_script, "borf -h")
         timing_script = c(timing_script,"rm -rf *transdecoder_dir*")
-        
+
         timing_script = c(timing_script,paste0("{ ", paste0("time borf -f ", "trinity_sample_n", n_txs[i], "_rep", j, ".fa"), " >> command.out ;} 2>> time.log"))
-        
+
         timing_script = c(timing_script, paste0("echo trinity_sample_n", n_txs[i], "_rep", j, ".fa", " >> command.out"))
-        
+
         timing_script = c(timing_script,paste0("{ ", paste0("time TransDecoder.LongOrfs -t ", "trinity_sample_n", n_txs[i], "_rep", j, ".fa"), " >> command.out ;} 2>> time.log"))
+        timing_script = c(timing_script,paste0("{ ", paste0("time TransDecoder.Predict -t ", "trinity_sample_n", n_txs[i], "_rep", j, ".fa"), " >> command.out ;} 2>> time.log"))
+        timing_script = c(timing_script, paste0("echo trinity_sample_n", n_txs[i], "_rep", j, ".fa", " >> command.out"))
+
+        timing_script = c(timing_script,paste0("{ ", paste0("time ~/apps/genemarks/gmst.pl --fnn --faa ", "trinity_sample_n", n_txs[i], "_rep", j, ".fa"), " >> command.out ;} 2>> time.log"))
 
     }
 }
-    
+
 write.table(timing_script, "data/timing_tests/time_orfs.sh", quote=F, row.names = F, col.names = F, sep='\n')
